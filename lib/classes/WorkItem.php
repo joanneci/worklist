@@ -1006,12 +1006,31 @@ class WorkItem {
         *If not create the fork
         *Check for existing unix account in dev.  If new, make call to create account
         */
-        $GitHubUser = new User($bid_info['bidder_id']);
-        $url = TOWER_API_URL;
-        $fields = array(
-            'action' => 'create_unixaccount',
-            'nickname' => $bidder->getNickname()
-        );
+        if ($project->getRequireSandbox() == 1) {
+            $password = $this->generatePassword();
+            $GitHubUser = new User($bid_info['bidder_id']);
+            $url = TOWER_API_URL;
+            $fields = array(
+                'action' => 'setup_sandbox',
+                'nickname' => $bidder->getNickname(),
+                'job_id' => $job_id,
+                'repo_name' => $repo['name'],
+                'password' => $password
+            );
+            $result = CURLHandler::Post($url, $fields);
+            //if pw comes back blank, let's send user email with ssh creds
+            if ($result && $password != '') {
+                $bidderEmail = $bidder->getUsername();
+                $emailTemplate = 'unixusername-created';
+                $data = array(
+                    'nickname' => $bidder->getNickname(),
+                    'password' => $password
+                );
+                $senderEmail = 'Worklist <contact@worklist.net>';
+                sendTemplateEmail($bidderEmail, $emailTemplate, $data, $senderEmail);
+                sleep(10);
+            }
+        }
         $result = CURLHandler::Post($url, $fields);
         if (!$GitHubUser->verifyForkExists($project)) {
             $forkStatus = $GitHubUser->createForkForUser($project);
