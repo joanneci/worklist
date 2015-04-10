@@ -1033,6 +1033,7 @@ class WorkItem {
         );
 
             $bid_info = array_merge($data, $bid_info);
+            $bid_info['sandbox'] = $branchStatus['branch_url'];
         if ($project->getRequireSandbox() == 1) {
             $password = $this->generatePassword();
             $url = TOWER_API_URL;
