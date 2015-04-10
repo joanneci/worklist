@@ -1022,22 +1022,17 @@ class WorkItem {
             sleep(10);
         }
         // Create a branch for the user
-        if (!$forkStatus['error']) {
-            $branchStatus = $GitHubUser->createBranchForUser($job_id, $project);
-            $bidderEmail = $bidder->getUsername();
-            $emailTemplate = 'branch-created';
-            $data = array(
-                'branch_name' => $job_id,
-                'nickname' => $bidder->getNickname(),
-                'users_fork' => $forkStatus['data']['git_url'],
-                'master_repo' => str_replace('https://', 'git://', $project->getRepository())
-            );
+        $branchStatus = $GitHubUser->createBranchForUser($job_id, $project);
+        $bidderEmail = $bidder->getUsername();
+        $emailTemplate = 'branch-created';
+        $data = array(
+            'branch_name' => $job_id,
+            'nickname' => $bidder->getNickname(),
+            'users_fork' => $forkStatus['data']['git_url'],
+            'master_repo' => str_replace('https://', 'git://', $project->getRepository())
+        );
 
             $bid_info = array_merge($data, $bid_info);
-        }
-        if (!$branchStatus['error']) {
-            $bid_info['sandbox'] = $branchStatus['branch_url'];
-        }
         if ($project->getRequireSandbox() == 1) {
             $password = $this->generatePassword();
             $url = TOWER_API_URL;
