@@ -1008,7 +1008,6 @@ class WorkItem {
         */
         $result = CURLHandler::Post($url, $fields);
         $GitHubUser = new User($bid_info['bidder_id']);
-
         if (!$GitHubUser->verifyForkExists($project)) {
             $forkStatus = $GitHubUser->createForkForUser($project);
             $bidderEmail = $bidder->getUsername();
