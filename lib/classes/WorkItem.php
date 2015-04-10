@@ -1006,7 +1006,6 @@ class WorkItem {
         *If not create the fork
         *Check for existing unix account in dev.  If new, make call to create account
         */
-        $result = CURLHandler::Post($url, $fields);
         $GitHubUser = new User($bid_info['bidder_id']);
         if (!$GitHubUser->verifyForkExists($project)) {
             $forkStatus = $GitHubUser->createForkForUser($project);
