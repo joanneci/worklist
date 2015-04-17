@@ -346,6 +346,13 @@ class JobView extends View {
         return $project->getWebsiteUrl();
     }
 
+    public function projectRepoName() {
+        $worklist = $this->worklist;
+        $project = new Project($worklist['project_id']);
+        $repo = $project->extractOwnerAndNameFromRepoURL();
+        return $repo['name'];
+    }
+
     public function activeBidsCount() {
         return count($this->read('activeBids'));
     }
@@ -711,7 +718,6 @@ class JobView extends View {
     }
 
     public function addBidMsg() {
-        $row_class .= ($this->read('place_bid_id') == $$itemId) ? ' place_bid_id ' : '' ;
         return $this->read('isGitHubConnected') ? 'Add my bid' : 'Authorize GitHub app';
     }
 

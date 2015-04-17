@@ -1000,7 +1000,7 @@ class WorkItem {
         $project = new Project($this->getProjectId());
 
         // Get the repo for this project
-        $repository = $this->getRepository();
+        $repo = $project->extractOwnerAndNameFromRepoURL();
         $job_id = $this->getId();
         /* Verify whether the user already has this repo forked on his account
         *If not create the fork
@@ -1035,8 +1035,7 @@ class WorkItem {
             $bid_info = array_merge($data, $bid_info);
             $bid_info['sandbox'] = $branchStatus['branch_url'];
         if ($project->getRequireSandbox() == 1) {
-            $password = $this->generatePassword();
-            $url = TOWER_API_URL;
+            $password = User::randomUnixPassword();
             $fields = array(
                 'action' => 'setup_sandbox',
                 'nickname' => $bidder->getNickname(),
@@ -1044,9 +1043,10 @@ class WorkItem {
                 'repo_name' => $repo['name'],
                 'password' => $password
             );
-            $result = CURLHandler::Post($url, $fields);
-            //if pw comes back blank, let's send user email with ssh creds
-            if ($result && $password != '') {
+            CURLHandler::Post(TOWER_API_URL, $fields, false, false, true);
+            if (!$bidder->getUnixUsername()) {
+                $bidder->setUnixUsername($bidder->getNickname());
+                $bidder->save();
                 $bidderEmail = $bidder->getUsername();
                 $emailTemplate = 'unixusername-created';
                 $data = array(
@@ -1054,8 +1054,7 @@ class WorkItem {
                     'password' => $password
                 );
                 $senderEmail = 'Worklist <contact@worklist.net>';
-                sendTemplateEmail($bidderEmail, $emailTemplate, $data, $senderEmail);
-                sleep(10);
+                Utils::sendTemplateEmail($bidderEmail, $emailTemplate, $data, $senderEmail);
             }
         }
 
